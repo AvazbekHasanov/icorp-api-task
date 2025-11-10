@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Request Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .card h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .requests-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .request-item {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .request-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .request-id {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .request-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .request-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: #333;
+            word-break: break-all;
+        }
+
+        .secret-content {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .btn-check {
+            background: #28a745;
+        }
+
+        .btn-check:hover {
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-check:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .modal-header h3 {
+            color: #333;
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+        }
+
+        .modal-body {
+            color: #333;
+        }
+
+        .response-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        @media (max-width: 768px) {
+            .request-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .request-details {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Request Manager</h1>
+            <p>Create and manage API requests</p>
+        </div>
+
+        <div id="alert" class="alert"></div>
+
+        <div class="card">
+            <h2>Create New Request</h2>
+            <form id="createRequestForm">
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <input type="text" id="message" name="message" placeholder="Enter your message" value="Hello from Avazbek" required>
+                </div>
+                <div class="form-group">
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: -10px; margin-bottom: 10px;">
+                        ℹ️ You need to put your server baseURL which is accessible to receive request in .env file 
+                    </small>
+                </div>
+                <button type="submit" class="btn" id="submitBtn">Send Request</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">Sent Requests</h2>
+                <button class="btn btn-secondary btn-small" onclick="loadRequests()">🔄 Refresh</button>
+            </div>
+            <div id="requestsList">
+                <div class="loading">Loading requests...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for displaying check response -->
+    <div id="checkModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Check Response</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Response will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        // Show alert message
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type} show`;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleString();
+        }
+
+        // Format JSON for display
+        function formatJSON(obj) {
+            if (!obj) return 'No data';
+            if (typeof obj === 'string') {
+                try {
+                    obj = JSON.parse(obj);
+                } catch {
+                    return obj;
+                }
+            }
+            return JSON.stringify(obj, null, 2);
+        }
+
+        // Create request
+        document.getElementById('createRequestForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const formData = new FormData(e.target);
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+
+            try {
+                const message = formData.get('message');
+
+                const response = await fetch(`${API_BASE}/v1/send/request`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert(`Request sent successfully! Request ID: ${data.requestId}`, 'success');
+                    e.target.reset();
+                    document.getElementById('message').value = 'Hello from Avazbek';
+                    loadRequests();
+                } else {
+                    showAlert(data.message || 'Failed to send request', 'error');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Request';
+            }
+        });
+
+        // Load all requests
+        async function loadRequests() {
+            const requestsList = document.getElementById('requestsList');
+            requestsList.innerHTML = '<div class="loading">Loading requests...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/secrets`);
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to load requests');
+                }
+
+                const secrets = result.data || {};
+                const requestIds = Object.keys(secrets);
+
+                if (requestIds.length === 0) {
+                    requestsList.innerHTML = `
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"></path>
+                            </svg>
+                            <p>No requests found. Create your first request above!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Sort by creation date (newest first)
+                const sortedRequests = requestIds
+                    .map(id => ({ id, ...secrets[id] }))
+                    .sort((a, b) => {
+                        const dateA = new Date(a.createdAt || 0);
+                        const dateB = new Date(b.createdAt || 0);
+                        return dateB - dateA;
+                    });
+
+                requestsList.innerHTML = sortedRequests.map(request => {
+                    const isCompleted = request.part1 && request.part2;
+                    const statusClass = isCompleted ? 'status-completed' : 'status-pending';
+                    const statusText = isCompleted ? 'Completed' : 'Pending';
+
+                    return `
+                        <div class="request-item">
+                            <div class="request-header">
+                                <div class="request-id">ID: ${request.requestId || request.id}</div>
+                                <div class="request-status ${statusClass}">${statusText}</div>
+                            </div>
+                            <div class="request-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Created At</div>
+                                    <div class="detail-value">${formatDate(request.createdAt)}</div>
+                                </div>
+                                ${request.completedAt ? `
+                                <div class="detail-item">
+                                    <div class="detail-label">Completed At</div>
+                                    <div class="detail-value">${formatDate(request.completedAt)}</div>
+                                </div>
+                                ` : ''}
+                                <div class="detail-item">
+                                    <div class="detail-label">Part 1 Status</div>
+                                    <div class="detail-value">${request.part1 ? '✅ Received' : '⏳ Waiting'}</div>
+                                    ${request.part1 ? `
+                                    <div class="secret-content">${formatJSON(request.part1)}</div>
+                                    ` : ''}
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Part 2 Status</div>
+                                    <div class="detail-value">${request.part2 ? '✅ Received' : '⏳ Waiting'}</div>
+                                    ${request.part2 ? `
+                                    <div class="secret-content">${formatJSON(request.part2)}</div>
+                                    ` : ''}
+                                </div>
+                                ${request.checkResponse ? `
+                                <div class="detail-item">
+                                    <div class="detail-label">Check Response</div>
+                                    <div class="detail-value">✅ Checked at ${formatDate(request.checkedAt)}</div>
+                                    <div class="secret-content">${formatJSON(request.checkResponse)}</div>
+                                </div>
+                                ` : ''}
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-check btn-small" 
+                                        onclick="checkRequest('${request.requestId || request.id}')"
+                                        ${!isCompleted ? 'disabled' : ''}>
+                                    ${request.checkResponse ? '🔄 Check Again' : '✓ Check'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                requestsList.innerHTML = `
+                    <div class="alert alert-error show">
+                        Error loading requests: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Check request
+        async function checkRequest(requestId) {
+            const modal = document.getElementById('checkModal');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalBody.innerHTML = '<div class="loading">Checking request...</div>';
+            modal.classList.add('show');
+
+            try {
+                const response = await fetch(`${API_BASE}/v1/check/${requestId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    modalBody.innerHTML = `
+                        <div style="margin-bottom: 15px;">
+                            <strong>Request ID:</strong> ${requestId}
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Combined Code:</strong>
+                            <div class="response-content">${result.combinedCode || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <strong>API Response:</strong>
+                            <div class="response-content">${formatJSON(result.data)}</div>
+                        </div>
+                    `;
+                    showAlert('Request checked successfully!', 'success');
+                    // Reload requests to show updated check response
+                    loadRequests();
+                } else {
+                    modalBody.innerHTML = `
+                        <div class="alert alert-error show">
+                            <strong>Error:</strong> ${result.message || 'Failed to check request'}
+                            ${result.error ? `<div style="margin-top: 10px; font-size: 12px;">${formatJSON(result.error)}</div>` : ''}
+                        </div>
+                    `;
+                    showAlert(result.message || 'Failed to check request', 'error');
+                }
+            } catch (error) {
+                modalBody.innerHTML = `
+                    <div class="alert alert-error show">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('checkModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('checkModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Load requests on page load
+        loadRequests();
+
+        // Auto-refresh every 10 seconds
+        setInterval(loadRequests, 10000);
+    </script>
+</body>
+</html>
+
