@@ -1,85 +1,84 @@
-# Texnik Topshiriq - Request Manager
+# Техническое задание - Request Manager
 
-A webhook-based request management system built with Node.js, Express, and TypeScript. This application allows you to send requests to an external API, receive webhook callbacks, and manage secret data through a modern admin interface.
+Система управления запросами с использованием вебхуков на Node.js, Express и TypeScript. Приложение отправляет запросы на внешний API, получает вебхук-коллбэки и управляет секретными данными через админ-панель.
 
-## Features
+## Функционал
 
-- 🚀 **Send API Requests**: Create and send requests to external APIs with custom messages
-- 🔔 **Webhook Support**: Receive and process webhook callbacks with secret data
-- 📊 **Admin Dashboard**: Beautiful, modern web interface for managing all requests
-- 💾 **Persistent Storage**: File-based storage for request data and secrets
-- ✅ **Request Verification**: Check and verify requests by combining secret parts
-- 🔄 **Auto-refresh**: Real-time updates in the admin panel
+- Отправка API-запросов с кастомными сообщениями
+- Получение и обработка вебхук-коллбэков с секретными данными
+- Веб-интерфейс для управления запросами
+- Файловое хранилище для данных запросов и секретов
+- Проверка запросов путем объединения частей секрета
+- Автообновление данных в админ-панели
 
-## Tech Stack
+## Технологии
 
 - **Backend**: Node.js, Express.js
-- **Language**: TypeScript
-- **Frontend**: Vanilla HTML/CSS/JavaScript
-- **Storage**: JSON file-based storage
+- **Язык**: TypeScript
+- **Frontend**: HTML/CSS/JavaScript
+- **Хранилище**: JSON файлы
 
-## Prerequisites
+## Требования
 
-- Node.js (v14 or higher)
-- npm or yarn
+- Node.js (v14+)
+- npm или yarn
 
-## Installation
+## Установка
 
-1. Clone the repository:
+1. Клонирование репозитория:
 ```bash
 git clone <repository-url>
 cd Texnik-Topshiriq
 ```
 
-2. Install dependencies:
+2. Установка зависимостей:
 ```bash
 npm install
 ```
 
-3. Create a `.env` file in the root directory (optional):
+3. Создание `.env` файла (опционально):
 ```env
 PORT=3000
 WEBHOOK_BASE_URL=http://your-server-url.com
 ```
 
-**Note**: If `WEBHOOK_BASE_URL` is not set, the application will use the current request's host. Make sure your server is accessible from the internet if you're expecting webhook callbacks.
+**Примечание**: Если `WEBHOOK_BASE_URL` не указан, используется хост текущего запроса. Сервер должен быть доступен из интернета для получения вебхук-коллбэков.
 
-## Usage
+## Запуск
 
-### Development Mode
+### Режим разработки
 
-Run the development server with hot-reload:
 ```bash
 npm run dev
 ```
 
-The server will start on `http://localhost:3000` (or the port specified in your `.env` file).
+Сервер запустится на `http://localhost:3000` (или указанный в `.env` порт).
 
-### Production Mode
+### Production режим
 
-1. Build the TypeScript code:
+1. Сборка TypeScript:
 ```bash
 npm run build
 ```
 
-2. Start the production server:
+2. Запуск:
 ```bash
 npm start
 ```
 
-## API Endpoints
+## API эндпоинты
 
 ### `POST /v1/send/request`
-Send a new request to the external API.
+Отправка нового запроса на внешний API.
 
-**Request Body:**
+**Тело запроса:**
 ```json
 {
   "message": "Hello from Avazbek"
 }
 ```
 
-**Response:**
+**Ответ:**
 ```json
 {
   "succes": true,
@@ -89,14 +88,14 @@ Send a new request to the external API.
 ```
 
 ### `POST /v1/recieve/secret/:requestId`
-Webhook endpoint to receive secret data (part 2).
+Вебхук-эндпоинт для получения секретных данных (часть 2).
 
-**Response:** `204 No Content`
+**Ответ:** `204 No Content`
 
 ### `GET /v1/secrets/:requestId`
-Get a specific request by ID.
+Получение конкретного запроса по ID.
 
-**Response:**
+**Ответ:**
 ```json
 {
   "success": true,
@@ -111,9 +110,9 @@ Get a specific request by ID.
 ```
 
 ### `GET /v1/secrets`
-Get all requests.
+Получение всех запросов.
 
-**Response:**
+**Ответ:**
 ```json
 {
   "success": true,
@@ -125,9 +124,9 @@ Get all requests.
 ```
 
 ### `POST /v1/check/:requestId`
-Check and verify a request by combining secret parts.
+Проверка запроса путем объединения частей секрета.
 
-**Response:**
+**Ответ:**
 ```json
 {
   "success": true,
@@ -136,64 +135,70 @@ Check and verify a request by combining secret parts.
 }
 ```
 
-## Admin Interface
+## Логика работы
 
-Access the admin panel at `http://localhost:3000/` (or your configured port).
+### Процесс отправки запроса
 
-The admin interface provides:
-- **Create Requests**: Send new requests with custom messages
-- **View All Requests**: See all sent requests with their status
-- **Request Details**: View part1, part2, and check responses
-- **Check Requests**: Verify requests by combining secret parts
-- **Auto-refresh**: Automatically updates every 10 seconds
+1. Клиент отправляет POST запрос на `/v1/send/request` с сообщением
+2. Сервер генерирует уникальный `requestId` (UUID)
+3. Отправляется запрос на внешний API с указанием webhook URL (`/v1/recieve/secret/:requestId`)
+4. Сохраняется `part1` секрета в `secrets.json`
+5. Возвращается `requestId` клиенту
 
-## Project Structure
+### Получение вебхука
+
+1. Внешний API отправляет POST запрос на `/v1/recieve/secret/:requestId`
+2. Сервер получает `part2` секрета
+3. Данные сохраняются в `secrets.json` для соответствующего `requestId`
+4. Устанавливается время `completedAt`
+
+### Проверка запроса
+
+1. Клиент отправляет POST на `/v1/check/:requestId`
+2. Сервер извлекает `part1` и `part2` из хранилища
+3. Объединяются коды из обеих частей
+4. Возвращается объединенный код
+
+## Админ-панель
+
+Доступна по адресу `http://localhost:3000/`
+
+Функции:
+- Создание новых запросов
+- Просмотр всех запросов и их статусов
+- Детали запроса (part1, part2, результат проверки)
+- Проверка запросов
+- Автообновление каждые 10 секунд
+
+## Структура проекта
 
 ```
 Texnik-Topshiriq/
-├── dist/                 # Compiled JavaScript files
-├── node_modules/         # Dependencies
-├── public/              # Static files
-│   └── admin.html       # Admin panel interface
-├── src/                 # Source code
-│   └── index.ts         # Main application file
-├── .env                 # Environment variables (create this)
-├── package.json         # Project dependencies
-├── tsconfig.json        # TypeScript configuration
-└── secrets.json         # Request storage (auto-generated)
+├── dist/                 # Скомпилированный JavaScript
+├── node_modules/         # Зависимости
+├── public/              # Статические файлы
+│   └── admin.html       # Админ-панель
+├── src/                 # Исходный код
+│   └── index.ts         # Главный файл приложения
+├── .env                 # Переменные окружения
+├── package.json         # Зависимости проекта
+├── tsconfig.json        # Конфигурация TypeScript
+└── secrets.json         # Хранилище запросов (создается автоматически)
 ```
 
-## Configuration
+## Конфигурация
 
-### Environment Variables
+### Переменные окружения
 
-- `PORT` (optional): Server port (default: 3000)
-- `WEBHOOK_BASE_URL` (optional): Base URL for webhook callbacks. If not set, uses the current request's host.
+- `PORT`: Порт сервера (по умолчанию: 3000)
+- `WEBHOOK_BASE_URL`: Базовый URL для вебхук-коллбэков (если не указан, используется хост текущего запроса)
 
-### Port Management
+## Хранилище данных
 
-The `predev` script automatically ensures the port is available before starting the development server.
+Все данные запросов хранятся в файле `secrets.json` в корне проекта. Файл создается автоматически при первом запросе.
 
-## Storage
+**Примечание**: Добавьте `secrets.json` в `.gitignore` если файл содержит конфиденциальные данные.
 
-All request data is stored in `secrets.json` in the project root. This file is automatically created when the first request is made.
-
-**Note**: Make sure to add `secrets.json` to your `.gitignore` if it contains sensitive data.
-
-## Development
-
-
-### TypeScript Configuration
-
-The project uses TypeScript with strict mode enabled. Configuration can be found in `tsconfig.json`.
-
-## License
-
-This project is private and not licensed for public use.
-
-## Author
+## Автор
 
 Avazbek
-
-
-
