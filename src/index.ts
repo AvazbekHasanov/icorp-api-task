@@ -10,6 +10,8 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
+const EXTERNAL_API = 'https://test.icorp.uz/interview.php'
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(process.cwd(), "public")));
@@ -64,7 +66,7 @@ app.post("/v1/send/request", async (req, res) => {
 		await updateSecret(requestId, "message", message);
 		await updateSecret(requestId, "webhookUrl", webhookUrl);
 		
-		const response = await axios.post("https://test.icorp.uz/interview.php", {
+		const response = await axios.post(EXTERNAL_API, {
 			msg: message,
 			url: webhookUrl,
 		});
@@ -196,7 +198,7 @@ app.post("/v1/check/:requestId", async (req, res) => {
 		}
 
 		const combinedCode = `${code1}${code2}`;
-		const response = await axios.get(`https://test.icorp.uz/interview.php?code=${encodeURIComponent(combinedCode)}`);
+		const response = await axios.get(`${EXTERNAL_API}?code=${encodeURIComponent(combinedCode)}`);
 
 		await updateSecret(requestId, "checkResponse", response.data);
 		await updateSecret(requestId, "checkedAt", new Date().toISOString());
